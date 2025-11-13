@@ -4,6 +4,83 @@ const authController = require("../controllers/auth.controller");
 
 /**
  * @swagger
+ * components:
+ *   securitySchemes:
+ *     bearerAuth:
+ *       type: http
+ *       scheme: bearer
+ *       bearerFormat: JWT
+
+ *   schemas:
+ *     UserRegistration:
+ *       type: object
+ *       required:
+ *         - fullName
+ *         - email
+ *         - phone
+ *         - password
+ *         - role
+ *       properties:
+ *         fullName:
+ *           type: string
+ *           example: Sandeep Rai
+ *         email:
+ *           type: string
+ *           format: email
+ *           example: sandeep@example.com
+ *         phone:
+ *           type: string
+ *           example: 9876543210
+ *         password:
+ *           type: string
+ *           format: password
+ *           example: secret123
+ *         role:
+ *           type: string
+ *           enum: [admin, teacher, student]
+ *           example: teacher
+ *         gender:
+ *           type: string
+ *           enum: [male, female, other]
+ *         dob:
+ *           type: string
+ *           format: date
+ *         address:
+ *           type: object
+ *           properties:
+ *             street: { type: string }
+ *             city: { type: string }
+ *             state: { type: string }
+ *             pincode: { type: string }
+ *         qualifications:
+ *           type: array
+ *           items: { type: string }
+ *         subjects:
+ *           type: array
+ *           items: { type: string }
+ *         admissionNumber: { type: string }
+ *         classId: { type: string }
+ *         parentName: { type: string }
+ *         parentPhone: { type: string }
+
+ *     UserLogin:
+ *       type: object
+ *       required:
+ *         - email
+ *         - password
+ *       properties:
+ *         email:
+ *           type: string
+ *           format: email
+ *           example: sandeep@example.com
+ *         password:
+ *           type: string
+ *           format: password
+ *           example: secret123
+ */
+
+/**
+ * @swagger
  * /api/auth/register:
  *   post:
  *     tags: [Auth]
@@ -47,3 +124,5 @@ router.post("/register", authController.register);
  *         description: User not found
  */
 router.post("/login", authController.login);
+
+module.exports = router;

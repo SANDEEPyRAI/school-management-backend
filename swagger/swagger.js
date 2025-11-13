@@ -10,6 +10,7 @@ const options = {
     },
     servers: [{ url: "http://localhost:5000" }],
   },
+  // apis: ["./routes/**/*.js", "./swagger/**/*.js"], // 👈 Add this line
   apis: ["./routes/**/*.js"],
 };
 
