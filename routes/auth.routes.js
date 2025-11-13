@@ -47,5 +47,3 @@ router.post("/register", authController.register);
  *         description: User not found
  */
 router.post("/login", authController.login);
-
-module.exports = router;
