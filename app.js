@@ -10,9 +10,10 @@ dotenv.config();
 connectDB();
 
 // ✅ Enable CORS before routes
+
 app.use(
   cors({
-    origin: "http://localhost:5173", // ya tumhara deployed frontend URL
+    origin: ["http://localhost:5173", "http://localhost:5000"], // ✅ React frontend + Swagger UI
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
   })
