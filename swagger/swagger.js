@@ -4,7 +4,7 @@ const options = {
   definition: {
     openapi: "3.0.0",
     info: {
-      title: "School Management System API",
+      title: "School Management System API v~0.0.1",
       version: "1.0.0",
       description: "Modular backend with RBAC and admin panel separation",
     },
