@@ -1,4 +1,5 @@
 const express = require("express");
+const cors = require("cors");
 const app = express();
 const dotenv = require("dotenv");
 const connectDB = require("./config/db");
@@ -7,6 +8,15 @@ const swaggerSpec = require("./swagger/swagger");
 
 dotenv.config();
 connectDB();
+
+// ✅ Enable CORS before routes
+app.use(
+  cors({
+    origin: "http://localhost:5173", // ya tumhara deployed frontend URL
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true,
+  })
+);
 
 app.use(express.json());
 
