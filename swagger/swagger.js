@@ -8,9 +8,17 @@ const options = {
       version: "1.0.0",
       description: "Modular backend with RBAC and admin panel separation",
     },
-    servers: [{ url: "http://localhost:5000" }],
+    servers: [
+      {
+        url: "http://localhost:5000/api",
+        description: "Local server",
+      },
+      {
+        url: "https://school-management-backend-tho4.onrender.com/api",
+        description: "Production server",
+      },
+    ],
   },
-  // apis: ["./routes/**/*.js", "./swagger/**/*.js"], // 👈 Add this line
   apis: ["./routes/**/*.js"],
 };
 

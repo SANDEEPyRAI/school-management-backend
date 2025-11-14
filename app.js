@@ -10,10 +10,13 @@ dotenv.config();
 connectDB();
 
 // ✅ Enable CORS before routes
-
 app.use(
   cors({
-    origin: ["http://localhost:5173", "http://localhost:5000"], // ✅ React frontend + Swagger UI
+    origin: [
+      "http://localhost:5173",
+      "http://localhost:5000",
+      "https://school-management-backend-tho4.onrender.com",
+    ],
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
   })
