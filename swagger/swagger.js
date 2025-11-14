@@ -10,11 +10,11 @@ const options = {
     },
     servers: [
       {
-        url: "http://localhost:5000/api",
+        url: "http://localhost:5000",
         description: "Local server",
       },
       {
-        url: "https://school-management-backend-tho4.onrender.com/api",
+        url: "https://school-management-backend-tho4.onrender.com",
         description: "Production server",
       },
     ],
