@@ -50,3 +50,38 @@ exports.getTeacherPermissions = async (req, res) => {
       .json({ message: "Failed to fetch permissions", error: err.message });
   }
 };
+
+// controllers/teacher.controller.js
+
+exports.updateTeacher = async (req, res) => {
+  try {
+    const { teacherId } = req.params;
+
+    const updated = await Teacher.findByIdAndUpdate(teacherId, req.body, {
+      new: true,
+    }).select("-password"); // password hide karna better hai
+
+    if (!updated) {
+      return res.status(404).json({ message: "Teacher not found" });
+    }
+
+    res.status(200).json({ updated });
+  } catch (err) {
+    res.status(500).json({ message: "Update failed", error: err.message });
+  }
+};
+
+exports.deleteTeacher = async (req, res) => {
+  try {
+    const { teacherId } = req.params;
+    const deleted = await Teacher.findByIdAndDelete(teacherId);
+
+    if (!deleted) {
+      return res.status(404).json({ message: "Teacher not found" });
+    }
+
+    res.status(200).json({ message: "Teacher deleted successfully" });
+  } catch (err) {
+    res.status(500).json({ message: "Delete failed", error: err.message });
+  }
+};

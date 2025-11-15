@@ -6,6 +6,13 @@ const { isAdmin } = require("../middlewares/role.middleware");
 
 /**
  * @swagger
+ * tags:
+ *   name: Teacher
+ *   description: Teacher management APIs
+ */
+
+/**
+ * @swagger
  * /api/teachers:
  *   post:
  *     tags: [Teacher]
@@ -45,6 +52,62 @@ router.post("/", protect, isAdmin, teacherController.createTeacher);
  *         description: Failed to fetch teachers
  */
 router.get("/", protect, teacherController.getAllTeachers);
+
+/**
+ * @swagger
+ * /api/teachers/{teacherId}:
+ *   put:
+ *     tags: [Teacher]
+ *     summary: Update a teacher
+ *     description: Update teacher details by ID
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: teacherId
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Teacher'
+ *     responses:
+ *       200:
+ *         description: Teacher updated successfully
+ *       404:
+ *         description: Teacher not found
+ *       500:
+ *         description: Update failed
+ */
+router.put("/:teacherId", protect, isAdmin, teacherController.updateTeacher);
+
+/**
+ * @swagger
+ * /api/teachers/{teacherId}:
+ *   delete:
+ *     tags: [Teacher]
+ *     summary: Delete a teacher
+ *     description: Remove a teacher profile by ID
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: teacherId
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Teacher deleted successfully
+ *       404:
+ *         description: Teacher not found
+ *       500:
+ *         description: Delete failed
+ */
+router.delete("/:teacherId", protect, isAdmin, teacherController.deleteTeacher);
 
 /**
  * @swagger

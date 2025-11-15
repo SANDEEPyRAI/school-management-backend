@@ -24,9 +24,7 @@ exports.getDashboardStats = async (req, res) => {
     const upcomingExams = await Exam.find({ date: { $gte: new Date() } }).limit(
       5
     );
-    const upcomingEvents = await Event?.find({
-      date: { $gte: new Date() },
-    }).limit(5); // optional
+    const upcomingEvents = []; // abhi ke liye skip
 
     res.status(200).json({
       users: {
