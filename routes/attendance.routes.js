@@ -5,11 +5,18 @@ const { protect } = require("../middlewares/auth.middleware");
 
 /**
  * @swagger
+ * tags:
+ *   name: Attendance
+ *   description: Attendance management APIs
+ */
+
+/**
+ * @swagger
  * /api/attendance:
  *   post:
  *     tags: [Attendance]
- *     summary: Mark attendance
- *     description: Marks attendance for a class on a specific date
+ *     summary: Mark attendance (create only, prevents duplicate class+date)
+ *     description: Marks attendance for a class on a specific date; fails if already marked
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -19,15 +26,21 @@ const { protect } = require("../middlewares/auth.middleware");
  *           schema:
  *             type: object
  *             properties:
- *               classId: { type: string }
- *               date: { type: string, format: date }
+ *               classId:
+ *                 type: string
+ *               date:
+ *                 type: string
+ *                 format: date
  *               records:
  *                 type: array
  *                 items:
  *                   type: object
  *                   properties:
- *                     studentId: { type: string }
- *                     status: { type: string, enum: ["present", "absent", "leave"] }
+ *                     studentId:
+ *                       type: string
+ *                     status:
+ *                       type: string
+ *                       enum: [present, absent, leave]
  *     responses:
  *       201:
  *         description: Attendance marked
@@ -41,17 +54,149 @@ router.post("/", protect, attendanceController.markAttendance);
 /**
  * @swagger
  * /api/attendance/class/{classId}:
- *   get:
+ *   put:
  *     tags: [Attendance]
- *     summary: Get attendance by class
- *     description: Returns attendance records for a class
+ *     summary: Upsert attendance by class and date
+ *     description: Updates if attendance exists for class+date, otherwise creates new
  *     security:
  *       - bearerAuth: []
  *     parameters:
- *       - name: classId
- *         in: path
+ *       - in: path
+ *         name: classId
  *         required: true
- *         schema: { type: string }
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               date:
+ *                 type: string
+ *                 format: date
+ *               records:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     studentId:
+ *                       type: string
+ *                     status:
+ *                       type: string
+ *                       enum: [present, absent, leave]
+ *     responses:
+ *       200:
+ *         description: Attendance upserted
+ *       500:
+ *         description: Failed to upsert attendance
+ */
+router.put(
+  "/class/:classId",
+  protect,
+  attendanceController.upsertAttendanceByClassAndDate
+);
+
+/**
+ * @swagger
+ * /api/attendance/{attendanceId}:
+ *   put:
+ *     tags: [Attendance]
+ *     summary: Update attendance by ID
+ *     description: Updates date and/or records by attendanceId
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: attendanceId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               date:
+ *                 type: string
+ *                 format: date
+ *               records:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     studentId:
+ *                       type: string
+ *                     status:
+ *                       type: string
+ *                       enum: [present, absent, leave]
+ *     responses:
+ *       200:
+ *         description: Attendance updated
+ *       404:
+ *         description: Attendance not found
+ *       500:
+ *         description: Failed to update attendance
+ */
+router.put(
+  "/:attendanceId",
+  protect,
+  attendanceController.updateAttendanceById
+);
+
+/**
+ * @swagger
+ * /api/attendance/{attendanceId}:
+ *   delete:
+ *     tags: [Attendance]
+ *     summary: Delete attendance by ID
+ *     description: Deletes one attendance document by ID
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: attendanceId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Attendance deleted
+ *       404:
+ *         description: Attendance not found
+ *       500:
+ *         description: Failed to delete attendance
+ */
+router.delete(
+  "/:attendanceId",
+  protect,
+  attendanceController.deleteAttendanceById
+);
+
+/**
+ * @swagger
+ * /api/attendance/class/{classId}:
+ *   get:
+ *     tags: [Attendance]
+ *     summary: Get attendance by class
+ *     description: Returns attendance records for a class; pass ?date=YYYY-MM-DD to fetch a specific day
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: classId
+ *         required: true
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: date
+ *         required: false
+ *         schema:
+ *           type: string
+ *           format: date
  *     responses:
  *       200:
  *         description: Attendance records
@@ -74,10 +219,11 @@ router.get(
  *     security:
  *       - bearerAuth: []
  *     parameters:
- *       - name: studentId
- *         in: path
+ *       - in: path
+ *         name: studentId
  *         required: true
- *         schema: { type: string }
+ *         schema:
+ *           type: string
  *     responses:
  *       200:
  *         description: Attendance records
@@ -89,5 +235,29 @@ router.get(
   protect,
   attendanceController.getAttendanceByStudent
 );
+
+/**
+ * @swagger
+ * /api/attendance/summary:
+ *   get:
+ *     tags: [Attendance]
+ *     summary: Get attendance summary per class
+ *     description: Returns total students and present/absent/leave counts for each class
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: date
+ *         required: false
+ *         schema:
+ *           type: string
+ *           format: date
+ *     responses:
+ *       200:
+ *         description: Attendance summary
+ *       500:
+ *         description: Failed to fetch summary
+ */
+router.get("/summary", protect, attendanceController.getAttendanceSummary);
 
 module.exports = router;

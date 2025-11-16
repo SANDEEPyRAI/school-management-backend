@@ -33,73 +33,61 @@ router.post("/", protect, isAdmin, classController.createClass);
 
 /**
  * @swagger
- * /api/classes/{classId}/students:
- *   put:
+ * /api/classes/{classId}:
+ *   get:
  *     tags: [Class]
- *     summary: Assign students to class
- *     description: Admin-only route to assign students to a class
+ *     summary: Get class by ID
+ *     description: Returns class details with students and teachers populated
  *     security:
  *       - bearerAuth: []
  *     parameters:
- *       - name: classId
- *         in: path
+ *       - in: path
+ *         name: classId
  *         required: true
- *         schema: { type: string }
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               studentIds: { type: array, items: { type: string } }
+ *         schema:
+ *           type: string
+ *         description: The ID of the class to fetch
  *     responses:
  *       200:
- *         description: Students assigned
+ *         description: Class details
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 class:
+ *                   type: object
+ *                   properties:
+ *                     _id:
+ *                       type: string
+ *                     name:
+ *                       type: string
+ *                     section:
+ *                       type: string
+ *                     teacherIds:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           _id: { type: string }
+ *                           fullName: { type: string }
+ *                           email: { type: string }
+ *                           role: { type: string }
+ *                     studentIds:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           _id: { type: string }
+ *                           fullName: { type: string }
+ *                           email: { type: string }
+ *                           role: { type: string }
+ *       404:
+ *         description: Class not found
  *       500:
- *         description: Failed to assign students
+ *         description: Failed to fetch class
  */
-router.put(
-  "/:classId/students",
-  protect,
-  isAdmin,
-  classController.assignStudents
-);
-
-/**
- * @swagger
- * /api/classes/{classId}/teachers:
- *   put:
- *     tags: [Class]
- *     summary: Assign teachers to class
- *     description: Admin-only route to assign teachers to a class
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - name: classId
- *         in: path
- *         required: true
- *         schema: { type: string }
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               teacherIds: { type: array, items: { type: string } }
- *     responses:
- *       200:
- *         description: Teachers assigned
- *       500:
- *         description: Failed to assign teachers
- */
-router.put(
-  "/:classId/teachers",
-  protect,
-  isAdmin,
-  classController.assignTeachers
-);
+router.get("/classes/:classId", protect, classController.getClassById);
 
 /**
  * @swagger
@@ -117,5 +105,55 @@ router.put(
  *         description: Failed to fetch classes
  */
 router.get("/", protect, classController.getAllClasses);
+
+/**
+ * @swagger
+ * /api/classes/{classId}/students:
+ *   put:
+ *     tags: [Class]
+ *     summary: Assign students to class
+ *     description: Admin-only route to assign students to a class
+ */
+router.put(
+  "/:classId/students",
+  protect,
+  isAdmin,
+  classController.assignStudents
+);
+
+/**
+ * @swagger
+ * /api/classes/{classId}/teachers:
+ *   put:
+ *     tags: [Class]
+ *     summary: Assign teachers to class
+ *     description: Admin-only route to assign teachers to a class
+ */
+router.put(
+  "/:classId/teachers",
+  protect,
+  isAdmin,
+  classController.assignTeachers
+);
+
+/**
+ * @swagger
+ * /api/classes/{classId}:
+ *   put:
+ *     tags: [Class]
+ *     summary: Update class
+ *     description: Admin-only route to update class details
+ */
+router.put("/:classId", protect, isAdmin, classController.updateClass);
+
+/**
+ * @swagger
+ * /api/classes/{classId}:
+ *   delete:
+ *     tags: [Class]
+ *     summary: Delete class
+ *     description: Admin-only route to delete a class
+ */
+router.delete("/:classId", protect, isAdmin, classController.deleteClass);
 
 module.exports = router;

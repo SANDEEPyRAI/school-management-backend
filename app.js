@@ -5,7 +5,7 @@ const dotenv = require("dotenv");
 const connectDB = require("./config/db");
 const swaggerUi = require("swagger-ui-express");
 const swaggerSpec = require("./swagger/swagger");
-
+const classRoutes = require("./routes/class.routes");
 dotenv.config();
 connectDB();
 
@@ -23,7 +23,7 @@ app.use(
 );
 
 app.use(express.json());
-
+app.use("/api", classRoutes);
 // Swagger UI
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
