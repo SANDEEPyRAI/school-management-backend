@@ -4,17 +4,21 @@ const paymentSchema = new mongoose.Schema(
   {
     studentId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: "User", // 👈 consistent with your Class model
       required: true,
     },
-    feeId: { type: mongoose.Schema.Types.ObjectId, ref: "Fee", required: true },
+    feeId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Fee",
+      required: true,
+    },
     amountPaid: { type: Number, required: true },
-    paymentDate: { type: Date, default: Date.now },
     status: {
       type: String,
       enum: ["paid", "partial", "unpaid"],
-      default: "paid",
+      default: "unpaid",
     },
+    paymentDate: { type: Date, default: Date.now },
   },
   { timestamps: true }
 );
