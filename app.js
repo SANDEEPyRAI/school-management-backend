@@ -21,8 +21,18 @@ app.use(
     credentials: true,
   })
 );
+const allowedOrigins = [
+  "https://school-management-admin-q82l.vercel.app",
+  "http://localhost:5173",
+];
 
 app.use(express.json());
+app.use(
+  cors({
+    origin: allowedOrigins,
+    credentials: true,
+  })
+);
 app.use("/api", classRoutes);
 // Swagger UI
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
