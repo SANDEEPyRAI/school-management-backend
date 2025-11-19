@@ -9,10 +9,10 @@ const options = {
       description: "Modular backend with RBAC and admin panel separation",
     },
     servers: [
-      {
-        url: "http://localhost:5000",
-        description: "Local server",
-      },
+      // {
+      //   url: "http://localhost:5000",
+      //   description: "Local server",
+      // },
       {
         url: "https://school-management-backend-tho4.onrender.com",
         description: "Production server",
