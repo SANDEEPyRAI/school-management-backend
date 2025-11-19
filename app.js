@@ -5,35 +5,27 @@ const dotenv = require("dotenv");
 const connectDB = require("./config/db");
 const swaggerUi = require("swagger-ui-express");
 const swaggerSpec = require("./swagger/swagger");
-const classRoutes = require("./routes/class.routes");
+
 dotenv.config();
 connectDB();
 
-// ✅ Enable CORS before routes
-app.use(
-  cors({
-    origin: [
-      // "http://localhost:5173",
-      // "http://localhost:5000",
-      "https://school-management-backend-tho4.onrender.com",
-    ],
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    credentials: true,
-  })
-);
+// ✅ Allowed origins (frontend + local dev)
 const allowedOrigins = [
   "https://school-management-admin-q82l.vercel.app",
   "http://localhost:5173",
 ];
 
 app.use(express.json());
+
+// ✅ Single CORS setup
 app.use(
   cors({
     origin: allowedOrigins,
+    methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
   })
 );
-app.use("/api", classRoutes);
+
 // Swagger UI
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
