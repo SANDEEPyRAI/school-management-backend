@@ -25,22 +25,6 @@ exports.register = async (req, res) => {
   }
 };
 
-// exports.login = async (req, res) => {
-//   try {
-//     const { email, password } = req.body;
-//     const user = await User.findOne({ email });
-//     if (!user) return res.status(404).json({ message: "User not found" });
-
-//     const match = await bcrypt.compare(password, user.password);
-//     if (!match) return res.status(401).json({ message: "Invalid credentials" });
-
-//     const token = generateToken(user._id, user.role);
-//     res.status(200).json({ user, token });
-//   } catch (err) {
-//     res.status(500).json({ message: "Login failed", error: err.message });
-//   }
-// };
-
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -51,19 +35,35 @@ exports.login = async (req, res) => {
     if (!match) return res.status(401).json({ message: "Invalid credentials" });
 
     const token = generateToken(user._id, user.role);
-
-    // remove password before sending
-    const { password: _, ...safeUser } = user.toObject();
-
-    // send token as cookie
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: true,
-      sameSite: "none",
-    });
-
-    res.status(200).json({ user: safeUser });
+    res.status(200).json({ user, token });
   } catch (err) {
     res.status(500).json({ message: "Login failed", error: err.message });
   }
 };
+
+// exports.login = async (req, res) => {
+//   try {
+//     const { email, password } = req.body;
+//     const user = await User.findOne({ email });
+//     if (!user) return res.status(404).json({ message: "User not found" });
+
+//     const match = await bcrypt.compare(password, user.password);
+//     if (!match) return res.status(401).json({ message: "Invalid credentials" });
+
+//     const token = generateToken(user._id, user.role);
+
+//     // remove password before sending
+//     const { password: _, ...safeUser } = user.toObject();
+
+//     // send token as cookie
+//     res.cookie("token", token, {
+//       httpOnly: true,
+//       secure: true,
+//       sameSite: "none",
+//     });
+
+//     res.status(200).json({ user: safeUser });
+//   } catch (err) {
+//     res.status(500).json({ message: "Login failed", error: err.message });
+//   }
+// };
