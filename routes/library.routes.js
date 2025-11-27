@@ -2,7 +2,14 @@ const express = require("express");
 const router = express.Router();
 const libraryController = require("../controllers/library.controller");
 const { protect } = require("../middlewares/auth.middleware");
-const { isAdmin } = require("../middlewares/role.middleware");
+const { checkPermission } = require("../middlewares/rbac.middelware");
+
+/**
+ * @swagger
+ * tags:
+ *   name: Library
+ *   description: Library management APIs
+ */
 
 /**
  * @swagger
@@ -10,7 +17,7 @@ const { isAdmin } = require("../middlewares/role.middleware");
  *   post:
  *     tags: [Library]
  *     summary: Add a book
- *     description: Admin-only route to add a book to the library
+ *     description: Requires "library.edit" permission
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -27,12 +34,16 @@ const { isAdmin } = require("../middlewares/role.middleware");
  *               totalCopies: { type: number }
  *               availableCopies: { type: number }
  *     responses:
- *       201:
- *         description: Book added
- *       500:
- *         description: Failed to add book
+ *       201: { description: Book added }
+ *       403: { description: Forbidden (RBAC) }
+ *       500: { description: Failed to add book }
  */
-router.post("/books", protect, isAdmin, libraryController.addBook);
+router.post(
+  "/books",
+  protect,
+  checkPermission("library", "edit"),
+  libraryController.addBook
+);
 
 /**
  * @swagger
@@ -40,7 +51,7 @@ router.post("/books", protect, isAdmin, libraryController.addBook);
  *   post:
  *     tags: [Library]
  *     summary: Issue a book
- *     description: Issues a book to a user if available
+ *     description: Requires "library.edit" permission
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -53,14 +64,17 @@ router.post("/books", protect, isAdmin, libraryController.addBook);
  *               bookId: { type: string }
  *               userId: { type: string }
  *     responses:
- *       201:
- *         description: Book issued
- *       400:
- *         description: Book not available
- *       500:
- *         description: Failed to issue book
+ *       201: { description: Book issued }
+ *       400: { description: Book not available }
+ *       403: { description: Forbidden (RBAC) }
+ *       500: { description: Failed to issue book }
  */
-router.post("/issue", protect, libraryController.issueBook);
+router.post(
+  "/issue",
+  protect,
+  checkPermission("library", "edit"),
+  libraryController.issueBook
+);
 
 /**
  * @swagger
@@ -68,7 +82,7 @@ router.post("/issue", protect, libraryController.issueBook);
  *   put:
  *     tags: [Library]
  *     summary: Return a book
- *     description: Marks a book as returned and updates availability
+ *     description: Requires "library.edit" permission
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -77,14 +91,17 @@ router.post("/issue", protect, libraryController.issueBook);
  *         required: true
  *         schema: { type: string }
  *     responses:
- *       200:
- *         description: Book returned
- *       400:
- *         description: Invalid issue record
- *       500:
- *         description: Failed to return book
+ *       200: { description: Book returned }
+ *       400: { description: Invalid issue record }
+ *       403: { description: Forbidden (RBAC) }
+ *       500: { description: Failed to return book }
  */
-router.put("/return/:issueId", protect, libraryController.returnBook);
+router.put(
+  "/return/:issueId",
+  protect,
+  checkPermission("library", "edit"),
+  libraryController.returnBook
+);
 
 /**
  * @swagger
@@ -92,15 +109,19 @@ router.put("/return/:issueId", protect, libraryController.returnBook);
  *   get:
  *     tags: [Library]
  *     summary: Get issued books
- *     description: Returns list of currently issued books
+ *     description: Requires "library.view" permission
  *     security:
  *       - bearerAuth: []
  *     responses:
- *       200:
- *         description: List of issued books
- *       500:
- *         description: Failed to fetch issued books
+ *       200: { description: List of issued books }
+ *       403: { description: Forbidden (RBAC) }
+ *       500: { description: Failed to fetch issued books }
  */
-router.get("/issued", protect, libraryController.getIssuedBooks);
+router.get(
+  "/issued",
+  protect,
+  checkPermission("library", "view"),
+  libraryController.getIssuedBooks
+);
 
 module.exports = router;

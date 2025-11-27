@@ -2,7 +2,14 @@ const express = require("express");
 const router = express.Router();
 const studentController = require("../controllers/student.controller");
 const { protect } = require("../middlewares/auth.middleware");
-const { isAdmin } = require("../middlewares/role.middleware");
+const { checkPermission } = require("../middlewares/rbac.middelware");
+
+/**
+ * @swagger
+ * tags:
+ *   name: Student
+ *   description: Student management APIs
+ */
 
 /**
  * @swagger
@@ -10,7 +17,7 @@ const { isAdmin } = require("../middlewares/role.middleware");
  *   post:
  *     tags: [Student]
  *     summary: Create a student
- *     description: Admin-only route to create a student profile
+ *     description: Requires "students.edit" permission to create a student profile
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -20,14 +27,17 @@ const { isAdmin } = require("../middlewares/role.middleware");
  *           schema:
  *             $ref: '#/components/schemas/UserRegistration'
  *     responses:
- *       201:
- *         description: Student created successfully
- *       400:
- *         description: Email already exists
- *       500:
- *         description: Student creation failed
+ *       201: { description: Student created successfully }
+ *       400: { description: Email already exists }
+ *       403: { description: Forbidden (RBAC) }
+ *       500: { description: Student creation failed }
  */
-router.post("/", protect, isAdmin, studentController.createStudent);
+router.post(
+  "/",
+  protect,
+  checkPermission("students", "edit"),
+  studentController.createStudent
+);
 
 /**
  * @swagger
@@ -35,16 +45,20 @@ router.post("/", protect, isAdmin, studentController.createStudent);
  *   get:
  *     tags: [Student]
  *     summary: Get all students
- *     description: Returns list of all registered students
+ *     description: Requires "students.view" permission. Returns list of all registered students.
  *     security:
  *       - bearerAuth: []
  *     responses:
- *       200:
- *         description: List of students
- *       500:
- *         description: Failed to fetch students
+ *       200: { description: List of students }
+ *       403: { description: Forbidden (RBAC) }
+ *       500: { description: Failed to fetch students }
  */
-router.get("/", protect, studentController.getAllStudents);
+router.get(
+  "/",
+  protect,
+  checkPermission("students", "view"),
+  studentController.getAllStudents
+);
 
 /**
  * @swagger
@@ -52,15 +66,14 @@ router.get("/", protect, studentController.getAllStudents);
  *   put:
  *     tags: [Student]
  *     summary: Update student info
- *     description: Admin-only route to update student details
+ *     description: Requires "students.edit" permission to update student details
  *     security:
  *       - bearerAuth: []
  *     parameters:
  *       - name: studentId
  *         in: path
  *         required: true
- *         schema:
- *           type: string
+ *         schema: { type: string }
  *     requestBody:
  *       required: true
  *       content:
@@ -68,11 +81,16 @@ router.get("/", protect, studentController.getAllStudents);
  *           schema:
  *             $ref: '#/components/schemas/UserRegistration'
  *     responses:
- *       200:
- *         description: Student updated
- *       500:
- *         description: Update failed
+ *       200: { description: Student updated }
+ *       403: { description: Forbidden (RBAC) }
+ *       404: { description: Student not found }
+ *       500: { description: Update failed }
  */
-router.put("/:studentId", protect, isAdmin, studentController.updateStudent);
+router.put(
+  "/:studentId",
+  protect,
+  checkPermission("students", "edit"),
+  studentController.updateStudent
+);
 
 module.exports = router;

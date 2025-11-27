@@ -34,3 +34,29 @@ exports.getExamsByDate = async (req, res) => {
       .json({ message: "Failed to fetch exams", error: err.message });
   }
 };
+
+exports.updateExam = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updated = await Exam.findByIdAndUpdate(id, req.body, { new: true });
+    if (!updated) return res.status(404).json({ message: "Exam not found" });
+    res.status(200).json({ exam: updated });
+  } catch (err) {
+    res
+      .status(500)
+      .json({ message: "Failed to update exam", error: err.message });
+  }
+};
+
+exports.deleteExam = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const deleted = await Exam.findByIdAndDelete(id);
+    if (!deleted) return res.status(404).json({ message: "Exam not found" });
+    res.status(200).json({ message: "Exam deleted successfully" });
+  } catch (err) {
+    res
+      .status(500)
+      .json({ message: "Failed to delete exam", error: err.message });
+  }
+};

@@ -37,6 +37,7 @@ app.use("/api/teachers", require("./routes/teacher.routes"));
 app.use("/api/classes", require("./routes/class.routes"));
 app.use("/api/attendance", require("./routes/attendance.routes"));
 app.use("/api/exams", require("./routes/exam.routes"));
+app.use("/api/event", require("./routes/event.routes"));
 app.use("/api/results", require("./routes/result.routes"));
 app.use("/api/notices", require("./routes/notice.routes"));
 app.use("/api/timetable", require("./routes/timetable.routes"));

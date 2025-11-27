@@ -2,7 +2,14 @@ const express = require("express");
 const router = express.Router();
 const dashboardController = require("../controllers/dashboard.controller");
 const { protect } = require("../middlewares/auth.middleware");
-const { isAdmin } = require("../middlewares/role.middleware");
+const { checkPermission } = require("../middlewares/rbac.middelware");
+
+/**
+ * @swagger
+ * tags:
+ *   name: Dashboard
+ *   description: Dashboard analytics APIs
+ */
 
 /**
  * @swagger
@@ -10,15 +17,22 @@ const { isAdmin } = require("../middlewares/role.middleware");
  *   get:
  *     tags: [Dashboard]
  *     summary: Get dashboard stats
- *     description: Returns school-wide analytics for admin dashboard
+ *     description: Requires "dashboard.view" permission. Returns school-wide analytics for dashboard.
  *     security:
  *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: Dashboard data returned
+ *       403:
+ *         description: Forbidden (RBAC)
  *       500:
  *         description: Failed to fetch dashboard stats
  */
-router.get("/", protect, isAdmin, dashboardController.getDashboardStats);
+router.get(
+  "/",
+  protect,
+  checkPermission("dashboard", "view"), // ✅ RBAC check
+  dashboardController.getDashboardStats
+);
 
 module.exports = router;

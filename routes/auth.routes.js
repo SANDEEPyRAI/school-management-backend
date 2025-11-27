@@ -10,7 +10,7 @@ const authController = require("../controllers/auth.controller");
  *       type: http
  *       scheme: bearer
  *       bearerFormat: JWT
-
+ *
  *   schemas:
  *     UserRegistration:
  *       type: object
@@ -21,30 +21,13 @@ const authController = require("../controllers/auth.controller");
  *         - password
  *         - role
  *       properties:
- *         fullName:
- *           type: string
- *           example: Sandeep Rai
- *         email:
- *           type: string
- *           format: email
- *           example: sandeep@example.com
- *         phone:
- *           type: string
- *           example: 9876543210
- *         password:
- *           type: string
- *           format: password
- *           example: secret123
- *         role:
- *           type: string
- *           enum: [admin, teacher, student]
- *           example: teacher
- *         gender:
- *           type: string
- *           enum: [male, female, other]
- *         dob:
- *           type: string
- *           format: date
+ *         fullName: { type: string, example: Sandeep Rai }
+ *         email: { type: string, format: email, example: sandeep@example.com }
+ *         phone: { type: string, example: 9876543210 }
+ *         password: { type: string, format: password, example: secret123 }
+ *         role: { type: string, enum: [admin, teacher, student], example: teacher }
+ *         gender: { type: string, enum: [male, female, other] }
+ *         dob: { type: string, format: date }
  *         address:
  *           type: object
  *           properties:
@@ -52,31 +35,28 @@ const authController = require("../controllers/auth.controller");
  *             city: { type: string }
  *             state: { type: string }
  *             pincode: { type: string }
- *         qualifications:
- *           type: array
- *           items: { type: string }
- *         subjects:
- *           type: array
- *           items: { type: string }
+ *         qualifications: { type: array, items: { type: string } }
+ *         subjects: { type: array, items: { type: string } }
  *         admissionNumber: { type: string }
  *         classId: { type: string }
  *         parentName: { type: string }
  *         parentPhone: { type: string }
-
+ *         permissions:
+ *           type: object
+ *           properties:
+ *             students: { type: object, properties: { view: { type: boolean }, edit: { type: boolean } } }
+ *             teachers: { type: object, properties: { view: { type: boolean }, edit: { type: boolean } } }
+ *             exams: { type: object, properties: { view: { type: boolean }, edit: { type: boolean } } }
+ *             results: { type: object, properties: { view: { type: boolean }, edit: { type: boolean } } }
+ *             fees: { type: object, properties: { view: { type: boolean }, edit: { type: boolean } } }
+ *             dashboard: { type: object, properties: { view: { type: boolean }, edit: { type: boolean } } }
+ *
  *     UserLogin:
  *       type: object
- *       required:
- *         - email
- *         - password
+ *       required: [email, password]
  *       properties:
- *         email:
- *           type: string
- *           format: email
- *           example: sandeep@example.com
- *         password:
- *           type: string
- *           format: password
- *           example: secret123
+ *         email: { type: string, format: email, example: sandeep@example.com }
+ *         password: { type: string, format: password, example: secret123 }
  */
 
 /**
@@ -93,12 +73,9 @@ const authController = require("../controllers/auth.controller");
  *           schema:
  *             $ref: '#/components/schemas/UserRegistration'
  *     responses:
- *       201:
- *         description: User registered successfully
- *       400:
- *         description: Email already exists
- *       500:
- *         description: Registration failed
+ *       201: { description: User registered successfully }
+ *       400: { description: Email already exists }
+ *       500: { description: Registration failed }
  */
 router.post("/register", authController.register);
 
@@ -118,10 +95,16 @@ router.post("/register", authController.register);
  *     responses:
  *       200:
  *         description: Login successful
- *       401:
- *         description: Invalid credentials
- *       404:
- *         description: User not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 token: { type: string }
+ *                 user:
+ *                   $ref: '#/components/schemas/UserRegistration'
+ *       401: { description: Invalid credentials }
+ *       404: { description: User not found }
  */
 router.post("/login", authController.login);
 

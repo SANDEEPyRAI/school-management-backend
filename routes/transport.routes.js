@@ -2,7 +2,14 @@ const express = require("express");
 const router = express.Router();
 const transportController = require("../controllers/transport.controller");
 const { protect } = require("../middlewares/auth.middleware");
-const { isAdmin } = require("../middlewares/role.middleware");
+const { checkPermission } = require("../middlewares/rbac.middelware");
+
+/**
+ * @swagger
+ * tags:
+ *   name: Transport
+ *   description: Transport management APIs
+ */
 
 /**
  * @swagger
@@ -10,7 +17,7 @@ const { isAdmin } = require("../middlewares/role.middleware");
  *   post:
  *     tags: [Transport]
  *     summary: Add transport vehicle
- *     description: Admin-only route to add a bus or van
+ *     description: Requires "transport.edit" permission to add a bus or van
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -26,12 +33,16 @@ const { isAdmin } = require("../middlewares/role.middleware");
  *               driverName: { type: string }
  *               driverPhone: { type: string }
  *     responses:
- *       201:
- *         description: Vehicle added
- *       500:
- *         description: Failed to add vehicle
+ *       201: { description: Vehicle added }
+ *       403: { description: Forbidden (RBAC) }
+ *       500: { description: Failed to add vehicle }
  */
-router.post("/vehicle", protect, isAdmin, transportController.addVehicle);
+router.post(
+  "/vehicle",
+  protect,
+  checkPermission("transport", "edit"),
+  transportController.addVehicle
+);
 
 /**
  * @swagger
@@ -39,7 +50,7 @@ router.post("/vehicle", protect, isAdmin, transportController.addVehicle);
  *   post:
  *     tags: [Transport]
  *     summary: Create transport route
- *     description: Admin-only route to define a route and assign vehicle
+ *     description: Requires "transport.edit" permission to define a route and assign vehicle
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -53,12 +64,16 @@ router.post("/vehicle", protect, isAdmin, transportController.addVehicle);
  *               stops: { type: array, items: { type: string } }
  *               vehicleId: { type: string }
  *     responses:
- *       201:
- *         description: Route created
- *       500:
- *         description: Failed to create route
+ *       201: { description: Route created }
+ *       403: { description: Forbidden (RBAC) }
+ *       500: { description: Failed to create route }
  */
-router.post("/route", protect, isAdmin, transportController.createRoute);
+router.post(
+  "/route",
+  protect,
+  checkPermission("transport", "edit"),
+  transportController.createRoute
+);
 
 /**
  * @swagger
@@ -66,7 +81,7 @@ router.post("/route", protect, isAdmin, transportController.createRoute);
  *   put:
  *     tags: [Transport]
  *     summary: Assign students to route
- *     description: Admin-only route to assign students to a transport route
+ *     description: Requires "transport.edit" permission to assign students to a transport route
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -83,15 +98,14 @@ router.post("/route", protect, isAdmin, transportController.createRoute);
  *             properties:
  *               studentIds: { type: array, items: { type: string } }
  *     responses:
- *       200:
- *         description: Students assigned
- *       500:
- *         description: Failed to assign students
+ *       200: { description: Students assigned }
+ *       403: { description: Forbidden (RBAC) }
+ *       500: { description: Failed to assign students }
  */
 router.put(
   "/route/:routeId/assign",
   protect,
-  isAdmin,
+  checkPermission("transport", "edit"),
   transportController.assignStudentsToRoute
 );
 
@@ -101,7 +115,7 @@ router.put(
  *   get:
  *     tags: [Transport]
  *     summary: Get route details
- *     description: Returns route, vehicle, and assigned students
+ *     description: Requires "transport.view" permission. Returns route, vehicle, and assigned students.
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -110,11 +124,15 @@ router.put(
  *         required: true
  *         schema: { type: string }
  *     responses:
- *       200:
- *         description: Route details
- *       500:
- *         description: Failed to fetch route
+ *       200: { description: Route details }
+ *       403: { description: Forbidden (RBAC) }
+ *       500: { description: Failed to fetch route }
  */
-router.get("/route/:routeId", protect, transportController.getRouteDetails);
+router.get(
+  "/route/:routeId",
+  protect,
+  checkPermission("transport", "view"),
+  transportController.getRouteDetails
+);
 
 module.exports = router;

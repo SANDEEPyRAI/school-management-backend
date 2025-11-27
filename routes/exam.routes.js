@@ -2,7 +2,14 @@ const express = require("express");
 const router = express.Router();
 const examController = require("../controllers/exam.controller");
 const { protect } = require("../middlewares/auth.middleware");
-const { isAdmin } = require("../middlewares/role.middleware");
+const { checkPermission } = require("../middlewares/rbac.middelware");
+
+/**
+ * @swagger
+ * tags:
+ *   name: Exam
+ *   description: Exam management
+ */
 
 /**
  * @swagger
@@ -10,7 +17,7 @@ const { isAdmin } = require("../middlewares/role.middleware");
  *   post:
  *     tags: [Exam]
  *     summary: Create an exam
- *     description: Admin-only route to create an exam for a class
+ *     description: Requires "exams.edit" permission
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -27,12 +34,16 @@ const { isAdmin } = require("../middlewares/role.middleware");
  *               duration: { type: number }
  *               maxMarks: { type: number }
  *     responses:
- *       201:
- *         description: Exam created
- *       500:
- *         description: Exam creation failed
+ *       201: { description: Exam created }
+ *       403: { description: Forbidden (RBAC) }
+ *       500: { description: Exam creation failed }
  */
-router.post("/", protect, isAdmin, examController.createExam);
+router.post(
+  "/",
+  protect,
+  checkPermission("exams", "edit"),
+  examController.createExam
+);
 
 /**
  * @swagger
@@ -40,7 +51,7 @@ router.post("/", protect, isAdmin, examController.createExam);
  *   get:
  *     tags: [Exam]
  *     summary: Get exams by class
- *     description: Returns all exams scheduled for a class
+ *     description: Requires "exams.view" permission
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -49,12 +60,16 @@ router.post("/", protect, isAdmin, examController.createExam);
  *         required: true
  *         schema: { type: string }
  *     responses:
- *       200:
- *         description: List of exams
- *       500:
- *         description: Failed to fetch exams
+ *       200: { description: List of exams }
+ *       403: { description: Forbidden (RBAC) }
+ *       500: { description: Failed to fetch exams }
  */
-router.get("/class/:classId", protect, examController.getExamsByClass);
+router.get(
+  "/class/:classId",
+  protect,
+  checkPermission("exams", "view"),
+  examController.getExamsByClass
+);
 
 /**
  * @swagger
@@ -62,7 +77,7 @@ router.get("/class/:classId", protect, examController.getExamsByClass);
  *   get:
  *     tags: [Exam]
  *     summary: Get exams by date
- *     description: Returns all exams scheduled on a specific date
+ *     description: Requires "exams.view" permission
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -71,11 +86,82 @@ router.get("/class/:classId", protect, examController.getExamsByClass);
  *         required: true
  *         schema: { type: string, format: date }
  *     responses:
- *       200:
- *         description: List of exams
- *       500:
- *         description: Failed to fetch exams
+ *       200: { description: List of exams }
+ *       403: { description: Forbidden (RBAC) }
+ *       500: { description: Failed to fetch exams }
  */
-router.get("/date/:date", protect, examController.getExamsByDate);
+router.get(
+  "/date/:date",
+  protect,
+  checkPermission("exams", "view"),
+  examController.getExamsByDate
+);
+
+/**
+ * @swagger
+ * /api/exams/{id}:
+ *   put:
+ *     tags: [Exam]
+ *     summary: Update an exam
+ *     description: Requires "exams.edit" permission
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         schema: { type: string }
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               title: { type: string }
+ *               subject: { type: string }
+ *               classId: { type: string }
+ *               date: { type: string, format: date }
+ *               duration: { type: number }
+ *               maxMarks: { type: number }
+ *     responses:
+ *       200: { description: Exam updated }
+ *       403: { description: Forbidden (RBAC) }
+ *       404: { description: Exam not found }
+ *       500: { description: Failed to update exam }
+ */
+router.put(
+  "/:id",
+  protect,
+  checkPermission("exams", "edit"),
+  examController.updateExam
+);
+
+/**
+ * @swagger
+ * /api/exams/{id}:
+ *   delete:
+ *     tags: [Exam]
+ *     summary: Delete an exam
+ *     description: Requires "exams.edit" permission
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       200: { description: Exam deleted successfully }
+ *       403: { description: Forbidden (RBAC) }
+ *       404: { description: Exam not found }
+ *       500: { description: Failed to delete exam }
+ */
+router.delete(
+  "/:id",
+  protect,
+  checkPermission("exams", "edit"),
+  examController.deleteExam
+);
 
 module.exports = router;

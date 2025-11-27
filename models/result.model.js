@@ -14,6 +14,11 @@ const resultSchema = new mongoose.Schema(
     },
     marksObtained: { type: Number, required: true },
     grade: { type: String },
+    classId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Class",
+      required: true, // ✅ class wise RBAC possible
+    },
   },
   { timestamps: true }
 );

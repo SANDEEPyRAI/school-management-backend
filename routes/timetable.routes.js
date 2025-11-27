@@ -2,7 +2,14 @@ const express = require("express");
 const router = express.Router();
 const timetableController = require("../controllers/timetable.controller");
 const { protect } = require("../middlewares/auth.middleware");
-const { isAdmin } = require("../middlewares/role.middleware");
+const { checkPermission } = require("../middlewares/rbac.middelware");
+
+/**
+ * @swagger
+ * tags:
+ *   name: Timetable
+ *   description: Timetable management APIs
+ */
 
 /**
  * @swagger
@@ -10,7 +17,7 @@ const { isAdmin } = require("../middlewares/role.middleware");
  *   post:
  *     tags: [Timetable]
  *     summary: Create or update timetable
- *     description: Admin-only route to create or update weekly timetable for a class
+ *     description: Requires "timetable.edit" permission to create or update weekly timetable for a class
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -33,14 +40,17 @@ const { isAdmin } = require("../middlewares/role.middleware");
  *                     startTime: { type: string }
  *                     endTime: { type: string }
  *     responses:
- *       201:
- *         description: Timetable created
- *       200:
- *         description: Timetable updated
- *       500:
- *         description: Failed to create/update timetable
+ *       201: { description: Timetable created }
+ *       200: { description: Timetable updated }
+ *       403: { description: Forbidden (RBAC) }
+ *       500: { description: Failed to create/update timetable }
  */
-router.post("/", protect, isAdmin, timetableController.createTimetable);
+router.post(
+  "/",
+  protect,
+  checkPermission("timetable", "edit"),
+  timetableController.createTimetable
+);
 
 /**
  * @swagger
@@ -48,7 +58,7 @@ router.post("/", protect, isAdmin, timetableController.createTimetable);
  *   get:
  *     tags: [Timetable]
  *     summary: Get timetable by class
- *     description: Returns weekly timetable for a class
+ *     description: Requires "timetable.view" permission. Returns weekly timetable for a class.
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -57,12 +67,16 @@ router.post("/", protect, isAdmin, timetableController.createTimetable);
  *         required: true
  *         schema: { type: string }
  *     responses:
- *       200:
- *         description: Timetable returned
- *       500:
- *         description: Failed to fetch timetable
+ *       200: { description: Timetable returned }
+ *       403: { description: Forbidden (RBAC) }
+ *       500: { description: Failed to fetch timetable }
  */
-router.get("/class/:classId", protect, timetableController.getTimetableByClass);
+router.get(
+  "/class/:classId",
+  protect,
+  checkPermission("timetable", "view"),
+  timetableController.getTimetableByClass
+);
 
 /**
  * @swagger
@@ -70,7 +84,7 @@ router.get("/class/:classId", protect, timetableController.getTimetableByClass);
  *   get:
  *     tags: [Timetable]
  *     summary: Get timetable by teacher
- *     description: Returns all timetable slots assigned to a teacher
+ *     description: Requires "timetable.view" permission. Returns all timetable slots assigned to a teacher.
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -79,14 +93,14 @@ router.get("/class/:classId", protect, timetableController.getTimetableByClass);
  *         required: true
  *         schema: { type: string }
  *     responses:
- *       200:
- *         description: Timetable returned
- *       500:
- *         description: Failed to fetch timetable
+ *       200: { description: Timetable returned }
+ *       403: { description: Forbidden (RBAC) }
+ *       500: { description: Failed to fetch timetable }
  */
 router.get(
   "/teacher/:teacherId",
   protect,
+  checkPermission("timetable", "view"),
   timetableController.getTimetableByTeacher
 );
 

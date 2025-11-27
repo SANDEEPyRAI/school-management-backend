@@ -148,22 +148,56 @@ exports.deleteUser = async (req, res) => {
 exports.assignPermissions = async (req, res) => {
   try {
     const { userId } = req.params;
-    const { permissions } = req.body; // Map<string, string[]>
+    const { permissions } = req.body; // { exams: { view: true, edit: false }, ... }
 
     const user = await User.findById(userId);
     if (!user || user.role !== "teacher") {
       return res.status(404).json({ message: "Teacher not found" });
     }
 
-    user.permissions = permissions || {};
+    // ✅ Validate incoming permissions object
+    const allowedModules = [
+      "attendance",
+      "students",
+      "teachers",
+      "classes",
+      "exams",
+      "results",
+      "fees",
+      "dashboard",
+      "events",
+      "library",
+      "notices",
+      "timetable",
+      "transport",
+      "users",
+    ];
+
+    const newPermissions = {};
+
+    allowedModules.forEach((module) => {
+      if (permissions[module]) {
+        newPermissions[module] = {
+          view: Boolean(permissions[module].view),
+          edit: Boolean(permissions[module].edit),
+        };
+      } else {
+        // default false if not provided
+        newPermissions[module] = { view: false, edit: false };
+      }
+    });
+
+    user.permissions = newPermissions;
     await user.save();
 
-    res
-      .status(200)
-      .json({ message: "Permissions updated", permissions: user.permissions });
+    res.status(200).json({
+      message: "Permissions updated successfully",
+      permissions: user.permissions,
+    });
   } catch (err) {
-    res
-      .status(500)
-      .json({ message: "Permission assignment failed", error: err.message });
+    res.status(500).json({
+      message: "Permission assignment failed",
+      error: err.message,
+    });
   }
 };

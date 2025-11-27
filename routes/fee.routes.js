@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const feeController = require("../controllers/fee.controller");
 const { protect } = require("../middlewares/auth.middleware");
-const { isAdmin } = require("../middlewares/role.middleware");
+const { checkPermission } = require("../middlewares/rbac.middelware");
 
 /**
  * @swagger
@@ -17,7 +17,7 @@ const { isAdmin } = require("../middlewares/role.middleware");
  *   post:
  *     tags: [Fee]
  *     summary: Create fee structure
- *     description: Admin-only route to define fee for a class
+ *     description: Requires "fees.edit" permission
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -32,12 +32,16 @@ const { isAdmin } = require("../middlewares/role.middleware");
  *               dueDate: { type: string, format: date }
  *               description: { type: string }
  *     responses:
- *       201:
- *         description: Fee created
- *       500:
- *         description: Failed to create fee
+ *       201: { description: Fee created }
+ *       403: { description: Forbidden (RBAC) }
+ *       500: { description: Failed to create fee }
  */
-router.post("/", protect, isAdmin, feeController.createFee);
+router.post(
+  "/",
+  protect,
+  checkPermission("fees", "edit"),
+  feeController.createFee
+);
 
 /**
  * @swagger
@@ -45,16 +49,20 @@ router.post("/", protect, isAdmin, feeController.createFee);
  *   get:
  *     tags: [Fee]
  *     summary: Get all fees
- *     description: Admin-only route to fetch all fee structures
+ *     description: Requires "fees.view" permission
  *     security:
  *       - bearerAuth: []
  *     responses:
- *       200:
- *         description: List of all fees
- *       500:
- *         description: Failed to fetch fees
+ *       200: { description: List of all fees }
+ *       403: { description: Forbidden (RBAC) }
+ *       500: { description: Failed to fetch fees }
  */
-router.get("/", protect, isAdmin, feeController.getAllFees);
+router.get(
+  "/",
+  protect,
+  checkPermission("fees", "view"),
+  feeController.getAllFees
+);
 
 /**
  * @swagger
@@ -62,7 +70,7 @@ router.get("/", protect, isAdmin, feeController.getAllFees);
  *   get:
  *     tags: [Fee]
  *     summary: Get fees for a specific class
- *     description: Admin-only route to fetch fees for a class
+ *     description: Requires "fees.view" permission
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -71,12 +79,16 @@ router.get("/", protect, isAdmin, feeController.getAllFees);
  *         required: true
  *         schema: { type: string }
  *     responses:
- *       200:
- *         description: List of class fees
- *       500:
- *         description: Failed to fetch class fees
+ *       200: { description: List of class fees }
+ *       403: { description: Forbidden (RBAC) }
+ *       500: { description: Failed to fetch class fees }
  */
-router.get("/class/:classId", protect, isAdmin, feeController.getClassFees);
+router.get(
+  "/class/:classId",
+  protect,
+  checkPermission("fees", "view"),
+  feeController.getClassFees
+);
 
 /**
  * @swagger
@@ -84,7 +96,7 @@ router.get("/class/:classId", protect, isAdmin, feeController.getClassFees);
  *   post:
  *     tags: [Fee]
  *     summary: Record fee payment
- *     description: Records payment made by a student
+ *     description: Requires "fees.edit" permission
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -99,12 +111,16 @@ router.get("/class/:classId", protect, isAdmin, feeController.getClassFees);
  *               amountPaid: { type: number }
  *               status: { type: string, enum: ["paid", "partial", "unpaid"] }
  *     responses:
- *       201:
- *         description: Payment recorded
- *       500:
- *         description: Failed to record payment
+ *       201: { description: Payment recorded }
+ *       403: { description: Forbidden (RBAC) }
+ *       500: { description: Failed to record payment }
  */
-router.post("/payments", protect, isAdmin, feeController.recordPayment);
+router.post(
+  "/payments",
+  protect,
+  checkPermission("fees", "edit"),
+  feeController.recordPayment
+);
 
 /**
  * @swagger
@@ -112,16 +128,20 @@ router.post("/payments", protect, isAdmin, feeController.recordPayment);
  *   get:
  *     tags: [Fee]
  *     summary: Get all payments
- *     description: Admin-only route to fetch all fee payments
+ *     description: Requires "fees.view" permission
  *     security:
  *       - bearerAuth: []
  *     responses:
- *       200:
- *         description: List of all payments
- *       500:
- *         description: Failed to fetch payments
+ *       200: { description: List of all payments }
+ *       403: { description: Forbidden (RBAC) }
+ *       500: { description: Failed to fetch payments }
  */
-router.get("/payments", protect, isAdmin, feeController.getAllPayments);
+router.get(
+  "/payments",
+  protect,
+  checkPermission("fees", "view"),
+  feeController.getAllPayments
+);
 
 /**
  * @swagger
@@ -129,7 +149,7 @@ router.get("/payments", protect, isAdmin, feeController.getAllPayments);
  *   get:
  *     tags: [Fee]
  *     summary: Get payment by ID
- *     description: Admin-only route to fetch a single payment
+ *     description: Requires "fees.view" permission
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -138,17 +158,15 @@ router.get("/payments", protect, isAdmin, feeController.getAllPayments);
  *         required: true
  *         schema: { type: string }
  *     responses:
- *       200:
- *         description: Payment details
- *       404:
- *         description: Payment not found
- *       500:
- *         description: Failed to fetch payment
+ *       200: { description: Payment details }
+ *       403: { description: Forbidden (RBAC) }
+ *       404: { description: Payment not found }
+ *       500: { description: Failed to fetch payment }
  */
 router.get(
   "/payments/:paymentId",
   protect,
-  isAdmin,
+  checkPermission("fees", "view"),
   feeController.getPaymentById
 );
 
@@ -158,7 +176,7 @@ router.get(
  *   get:
  *     tags: [Fee]
  *     summary: Get student payments
- *     description: Returns all fee payments made by a student
+ *     description: Requires "fees.view" permission
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -167,12 +185,16 @@ router.get(
  *         required: true
  *         schema: { type: string }
  *     responses:
- *       200:
- *         description: List of payments
- *       500:
- *         description: Failed to fetch payments
+ *       200: { description: List of payments }
+ *       403: { description: Forbidden (RBAC) }
+ *       500: { description: Failed to fetch payments }
  */
-router.get("/student/:studentId", protect, feeController.getStudentPayments);
+router.get(
+  "/student/:studentId",
+  protect,
+  checkPermission("fees", "view"),
+  feeController.getStudentPayments
+);
 
 /**
  * @swagger
@@ -180,7 +202,7 @@ router.get("/student/:studentId", protect, feeController.getStudentPayments);
  *   put:
  *     tags: [Fee]
  *     summary: Update fee structure
- *     description: Admin-only route to update fee details
+ *     description: Requires "fees.edit" permission
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -199,14 +221,17 @@ router.get("/student/:studentId", protect, feeController.getStudentPayments);
  *               dueDate: { type: string, format: date }
  *               description: { type: string }
  *     responses:
- *       200:
- *         description: Fee updated
- *       404:
- *         description: Fee not found
- *       500:
- *         description: Failed to update fee
+ *       200: { description: Fee updated }
+ *       403: { description: Forbidden (RBAC) }
+ *       404: { description: Fee not found }
+ *       500: { description: Failed to update fee }
  */
-router.put("/:feeId", protect, isAdmin, feeController.updateFee);
+router.put(
+  "/:feeId",
+  protect,
+  checkPermission("fees", "edit"),
+  feeController.updateFee
+);
 
 /**
  * @swagger
@@ -214,7 +239,7 @@ router.put("/:feeId", protect, isAdmin, feeController.updateFee);
  *   put:
  *     tags: [Fee]
  *     summary: Update payment record
- *     description: Admin-only route to update payment details
+ *     description: Requires "fees.edit" permission
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -232,17 +257,15 @@ router.put("/:feeId", protect, isAdmin, feeController.updateFee);
  *               amountPaid: { type: number }
  *               status: { type: string, enum: ["paid", "partial", "unpaid"] }
  *     responses:
- *       200:
- *         description: Payment updated
- *       404:
- *         description: Payment not found
- *       500:
- *         description: Failed to update payment
+ *       200: { description: Payment updated }
+ *       403: { description: Forbidden (RBAC) }
+ *       404: { description: Payment not found }
+ *       500: { description: Failed to update payment }
  */
 router.put(
   "/payments/:paymentId",
   protect,
-  isAdmin,
+  checkPermission("fees", "edit"),
   feeController.updatePayment
 );
 

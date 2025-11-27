@@ -2,6 +2,14 @@ const express = require("express");
 const router = express.Router();
 const noticeController = require("../controllers/notice.controller");
 const { protect } = require("../middlewares/auth.middleware");
+const { checkPermission } = require("../middlewares/rbac.middelware");
+
+/**
+ * @swagger
+ * tags:
+ *   name: Notice
+ *   description: Notice management APIs
+ */
 
 /**
  * @swagger
@@ -9,7 +17,7 @@ const { protect } = require("../middlewares/auth.middleware");
  *   post:
  *     tags: [Notice]
  *     summary: Create a notice
- *     description: Admin or teacher can create a notice for roles or classes
+ *     description: Requires "notices.edit" permission. Admin or teacher can create a notice for roles or classes.
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -28,12 +36,16 @@ const { protect } = require("../middlewares/auth.middleware");
  *                 type: array
  *                 items: { type: string }
  *     responses:
- *       201:
- *         description: Notice created
- *       500:
- *         description: Failed to create notice
+ *       201: { description: Notice created }
+ *       403: { description: Forbidden (RBAC) }
+ *       500: { description: Failed to create notice }
  */
-router.post("/", protect, noticeController.createNotice);
+router.post(
+  "/",
+  protect,
+  checkPermission("notices", "edit"),
+  noticeController.createNotice
+);
 
 /**
  * @swagger
@@ -41,15 +53,19 @@ router.post("/", protect, noticeController.createNotice);
  *   get:
  *     tags: [Notice]
  *     summary: Get notices for user
- *     description: Returns notices based on user's role and class
+ *     description: Requires "notices.view" permission. Returns notices based on user's role and class.
  *     security:
  *       - bearerAuth: []
  *     responses:
- *       200:
- *         description: List of notices
- *       500:
- *         description: Failed to fetch notices
+ *       200: { description: List of notices }
+ *       403: { description: Forbidden (RBAC) }
+ *       500: { description: Failed to fetch notices }
  */
-router.get("/", protect, noticeController.getNoticesForUser);
+router.get(
+  "/",
+  protect,
+  checkPermission("notices", "view"),
+  noticeController.getNoticesForUser
+);
 
 module.exports = router;

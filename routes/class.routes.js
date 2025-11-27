@@ -2,7 +2,14 @@ const express = require("express");
 const router = express.Router();
 const classController = require("../controllers/class.controller");
 const { protect } = require("../middlewares/auth.middleware");
-const { isAdmin } = require("../middlewares/role.middleware");
+const { checkPermission } = require("../middlewares/rbac.middelware");
+
+/**
+ * @swagger
+ * tags:
+ *   name: Class
+ *   description: Class and section management APIs
+ */
 
 /**
  * @swagger
@@ -10,7 +17,7 @@ const { isAdmin } = require("../middlewares/role.middleware");
  *   post:
  *     tags: [Class]
  *     summary: Create a class
- *     description: Admin-only route to create a class/section
+ *     description: Requires "classes.edit" permission
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -24,12 +31,16 @@ const { isAdmin } = require("../middlewares/role.middleware");
  *               section: { type: string }
  *               subjects: { type: array, items: { type: string } }
  *     responses:
- *       201:
- *         description: Class created
- *       500:
- *         description: Class creation failed
+ *       201: { description: Class created }
+ *       403: { description: Forbidden (RBAC) }
+ *       500: { description: Class creation failed }
  */
-router.post("/", protect, isAdmin, classController.createClass);
+router.post(
+  "/",
+  protect,
+  checkPermission("classes", "edit"),
+  classController.createClass
+);
 
 /**
  * @swagger
@@ -37,57 +48,26 @@ router.post("/", protect, isAdmin, classController.createClass);
  *   get:
  *     tags: [Class]
  *     summary: Get class by ID
- *     description: Returns class details with students and teachers populated
+ *     description: Requires "classes.view" permission
  *     security:
  *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: classId
  *         required: true
- *         schema:
- *           type: string
- *         description: The ID of the class to fetch
+ *         schema: { type: string }
  *     responses:
- *       200:
- *         description: Class details
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 class:
- *                   type: object
- *                   properties:
- *                     _id:
- *                       type: string
- *                     name:
- *                       type: string
- *                     section:
- *                       type: string
- *                     teacherIds:
- *                       type: array
- *                       items:
- *                         type: object
- *                         properties:
- *                           _id: { type: string }
- *                           fullName: { type: string }
- *                           email: { type: string }
- *                           role: { type: string }
- *                     studentIds:
- *                       type: array
- *                       items:
- *                         type: object
- *                         properties:
- *                           _id: { type: string }
- *                           fullName: { type: string }
- *                           email: { type: string }
- *                           role: { type: string }
- *       404:
- *         description: Class not found
- *       500:
- *         description: Failed to fetch class
+ *       200: { description: Class details }
+ *       403: { description: Forbidden (RBAC) }
+ *       404: { description: Class not found }
+ *       500: { description: Failed to fetch class }
  */
-router.get("/classes/:classId", protect, classController.getClassById);
+router.get(
+  "/:classId",
+  protect,
+  checkPermission("classes", "view"),
+  classController.getClassById
+);
 
 /**
  * @swagger
@@ -95,16 +75,20 @@ router.get("/classes/:classId", protect, classController.getClassById);
  *   get:
  *     tags: [Class]
  *     summary: Get all classes
- *     description: Returns list of all classes with assigned students and teachers
+ *     description: Requires "classes.view" permission
  *     security:
  *       - bearerAuth: []
  *     responses:
- *       200:
- *         description: List of classes
- *       500:
- *         description: Failed to fetch classes
+ *       200: { description: List of classes }
+ *       403: { description: Forbidden (RBAC) }
+ *       500: { description: Failed to fetch classes }
  */
-router.get("/", protect, classController.getAllClasses);
+router.get(
+  "/",
+  protect,
+  checkPermission("classes", "view"),
+  classController.getAllClasses
+);
 
 /**
  * @swagger
@@ -112,12 +96,14 @@ router.get("/", protect, classController.getAllClasses);
  *   put:
  *     tags: [Class]
  *     summary: Assign students to class
- *     description: Admin-only route to assign students to a class
+ *     description: Requires "classes.edit" permission
+ *     security:
+ *       - bearerAuth: []
  */
 router.put(
   "/:classId/students",
   protect,
-  isAdmin,
+  checkPermission("classes", "edit"),
   classController.assignStudents
 );
 
@@ -127,12 +113,14 @@ router.put(
  *   put:
  *     tags: [Class]
  *     summary: Assign teachers to class
- *     description: Admin-only route to assign teachers to a class
+ *     description: Requires "classes.edit" permission
+ *     security:
+ *       - bearerAuth: []
  */
 router.put(
   "/:classId/teachers",
   protect,
-  isAdmin,
+  checkPermission("classes", "edit"),
   classController.assignTeachers
 );
 
@@ -142,9 +130,16 @@ router.put(
  *   put:
  *     tags: [Class]
  *     summary: Update class
- *     description: Admin-only route to update class details
+ *     description: Requires "classes.edit" permission
+ *     security:
+ *       - bearerAuth: []
  */
-router.put("/:classId", protect, isAdmin, classController.updateClass);
+router.put(
+  "/:classId",
+  protect,
+  checkPermission("classes", "edit"),
+  classController.updateClass
+);
 
 /**
  * @swagger
@@ -152,8 +147,15 @@ router.put("/:classId", protect, isAdmin, classController.updateClass);
  *   delete:
  *     tags: [Class]
  *     summary: Delete class
- *     description: Admin-only route to delete a class
+ *     description: Requires "classes.edit" permission
+ *     security:
+ *       - bearerAuth: []
  */
-router.delete("/:classId", protect, isAdmin, classController.deleteClass);
+router.delete(
+  "/:classId",
+  protect,
+  checkPermission("classes", "edit"),
+  classController.deleteClass
+);
 
 module.exports = router;

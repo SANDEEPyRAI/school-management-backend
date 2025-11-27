@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const attendanceController = require("../controllers/attendance.controller");
 const { protect } = require("../middlewares/auth.middleware");
+const { checkPermission } = require("../middlewares/rbac.middelware");
 
 /**
  * @swagger
@@ -46,10 +47,17 @@ const { protect } = require("../middlewares/auth.middleware");
  *         description: Attendance marked
  *       400:
  *         description: Already marked
+ *       403:
+ *         description: Forbidden (RBAC)
  *       500:
  *         description: Failed to mark attendance
  */
-router.post("/", protect, attendanceController.markAttendance);
+router.post(
+  "/",
+  protect,
+  checkPermission("attendance", "edit"), // ✅ needs edit permission
+  attendanceController.markAttendance
+);
 
 /**
  * @swagger
@@ -89,12 +97,15 @@ router.post("/", protect, attendanceController.markAttendance);
  *     responses:
  *       200:
  *         description: Attendance upserted
+ *       403:
+ *         description: Forbidden (RBAC)
  *       500:
  *         description: Failed to upsert attendance
  */
 router.put(
   "/class/:classId",
   protect,
+  checkPermission("attendance", "edit"), // ✅ edit permission
   attendanceController.upsertAttendanceByClassAndDate
 );
 
@@ -138,12 +149,15 @@ router.put(
  *         description: Attendance updated
  *       404:
  *         description: Attendance not found
+ *       403:
+ *         description: Forbidden (RBAC)
  *       500:
  *         description: Failed to update attendance
  */
 router.put(
   "/:attendanceId",
   protect,
+  checkPermission("attendance", "edit"), // ✅ edit permission
   attendanceController.updateAttendanceById
 );
 
@@ -167,12 +181,15 @@ router.put(
  *         description: Attendance deleted
  *       404:
  *         description: Attendance not found
+ *       403:
+ *         description: Forbidden (RBAC)
  *       500:
  *         description: Failed to delete attendance
  */
 router.delete(
   "/:attendanceId",
   protect,
+  checkPermission("attendance", "edit"), // ✅ edit permission
   attendanceController.deleteAttendanceById
 );
 
@@ -200,12 +217,15 @@ router.delete(
  *     responses:
  *       200:
  *         description: Attendance records
+ *       403:
+ *         description: Forbidden (RBAC)
  *       500:
  *         description: Failed to fetch attendance
  */
 router.get(
   "/class/:classId",
   protect,
+  checkPermission("attendance", "view"), // ✅ view permission
   attendanceController.getAttendanceByClass
 );
 
@@ -227,12 +247,15 @@ router.get(
  *     responses:
  *       200:
  *         description: Attendance records
+ *       403:
+ *         description: Forbidden (RBAC)
  *       500:
  *         description: Failed to fetch attendance
  */
 router.get(
   "/student/:studentId",
   protect,
+  checkPermission("attendance", "view"), // ✅ view permission
   attendanceController.getAttendanceByStudent
 );
 
@@ -255,9 +278,16 @@ router.get(
  *     responses:
  *       200:
  *         description: Attendance summary
+ *       403:
+ *         description: Forbidden (RBAC)
  *       500:
  *         description: Failed to fetch summary
  */
-router.get("/summary", protect, attendanceController.getAttendanceSummary);
+router.get(
+  "/summary",
+  protect,
+  checkPermission("attendance", "view"), // ✅ view permission
+  attendanceController.getAttendanceSummary
+);
 
 module.exports = router;
