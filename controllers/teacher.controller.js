@@ -22,12 +22,48 @@ exports.createTeacher = async (req, res) => {
   }
 };
 
+// exports.getAllTeachers = async (req, res) => {
+//   try {
+//     const teachers = await Teacher.find({ role: "teacher" }).select(
+//       "-password"
+//     );
+//     res.status(200).json({ teachers });
+//   } catch (err) {
+//     res
+//       .status(500)
+//       .json({ message: "Failed to fetch teachers", error: err.message });
+//   }
+// };
 exports.getAllTeachers = async (req, res) => {
   try {
-    const teachers = await Teacher.find({ role: "teacher" }).select(
-      "-password"
-    );
-    res.status(200).json({ teachers });
+    const { page = 1, limit = 10, search = "" } = req.query;
+
+    const filter = { role: "teacher" };
+    if (search) {
+      filter.$or = [
+        { fullName: { $regex: search, $options: "i" } },
+        { email: { $regex: search, $options: "i" } },
+        { phone: { $regex: search, $options: "i" } },
+      ];
+    }
+
+    const total = await Teacher.countDocuments(filter);
+
+    const teachers = await Teacher.find(filter)
+      .select("-password")
+      .skip((page - 1) * limit)
+      .limit(Number(limit))
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({
+      teachers,
+      pagination: {
+        total,
+        page: Number(page),
+        limit: Number(limit),
+        totalPages: Math.ceil(total / limit),
+      },
+    });
   } catch (err) {
     res
       .status(500)
