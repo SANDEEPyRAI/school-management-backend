@@ -1,5 +1,7 @@
-const Student = require("../models/user.model"); // using User model with role = student
+const Student = require("../models/user.model"); // User model with role = student
+const bcrypt = require("bcryptjs");
 
+// ✅ Create student
 exports.createStudent = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -7,7 +9,7 @@ exports.createStudent = async (req, res) => {
     if (existing)
       return res.status(400).json({ message: "Email already exists" });
 
-    const hashedPassword = await require("bcryptjs").hash(password, 10);
+    const hashedPassword = await bcrypt.hash(password, 10);
     const student = await Student.create({
       ...req.body,
       password: hashedPassword,
@@ -22,24 +24,11 @@ exports.createStudent = async (req, res) => {
   }
 };
 
-// exports.getAllStudents = async (req, res) => {
-//   try {
-//     const students = await Student.find({ role: "student" }).select(
-//       "-password"
-//     );
-//     res.status(200).json({ students });
-//   } catch (err) {
-//     res
-//       .status(500)
-//       .json({ message: "Failed to fetch students", error: err.message });
-//   }
-// };
+// ✅ Get all students (paginated + search)
 exports.getAllStudents = async (req, res) => {
   try {
-    // ✅ Query params
     const { page = 1, limit = 10, search = "" } = req.query;
 
-    // ✅ Build search filter
     const filter = { role: "student" };
     if (search) {
       filter.$or = [
@@ -50,15 +39,14 @@ exports.getAllStudents = async (req, res) => {
       ];
     }
 
-    // ✅ Count total
     const total = await Student.countDocuments(filter);
 
-    // ✅ Fetch paginated + exclude password
     const students = await Student.find(filter)
       .select("-password")
       .skip((page - 1) * limit)
       .limit(Number(limit))
       .sort({ createdAt: -1 });
+
     res.status(200).json({
       students,
       pagination: {
@@ -75,14 +63,44 @@ exports.getAllStudents = async (req, res) => {
   }
 };
 
+// ✅ Get students by class
+exports.getStudentsByClass = async (req, res) => {
+  try {
+    const { classId } = req.params;
+    const students = await Student.find({ role: "student", classId }).select(
+      "-password"
+    );
+    res.status(200).json({ students });
+  } catch (err) {
+    res.status(500).json({
+      message: "Failed to fetch students by class",
+      error: err.message,
+    });
+  }
+};
+
+// ✅ Update student
 exports.updateStudent = async (req, res) => {
   try {
     const { studentId } = req.params;
     const updated = await Student.findByIdAndUpdate(studentId, req.body, {
       new: true,
-    });
+    }).select("-password");
+    if (!updated) return res.status(404).json({ message: "Student not found" });
     res.status(200).json({ updated });
   } catch (err) {
     res.status(500).json({ message: "Update failed", error: err.message });
+  }
+};
+
+// ✅ Delete student
+exports.deleteStudent = async (req, res) => {
+  try {
+    const { studentId } = req.params;
+    const deleted = await Student.findByIdAndDelete(studentId);
+    if (!deleted) return res.status(404).json({ message: "Student not found" });
+    res.status(200).json({ message: "Student deleted successfully" });
+  } catch (err) {
+    res.status(500).json({ message: "Delete failed", error: err.message });
   }
 };

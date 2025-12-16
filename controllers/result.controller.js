@@ -12,30 +12,49 @@ exports.recordResult = async (req, res) => {
     const result = await Result.create({
       examId,
       studentId,
-      marksObtained,
+      marksObtained, // ✅ ab object of subjects
       grade,
       classId,
     });
+
     res.status(201).json({ result });
   } catch (err) {
-    res
-      .status(500)
-      .json({ message: "Failed to record result", error: err.message });
+    res.status(500).json({
+      message: "Failed to record result",
+      error: err.message,
+    });
   }
 };
 
-// Get results by student
+// // Get results by student
+// exports.getResultsByStudent = async (req, res) => {
+//   try {
+//     const { studentId } = req.params;
+//     const results = await Result.find({ studentId })
+//       .populate("examId")
+//       .populate("classId");
+//     res.status(200).json({ results });
+//   } catch (err) {
+//     res
+//       .status(500)
+//       .json({ message: "Failed to fetch results", error: err.message });
+//   }
+// };// Get results by student
 exports.getResultsByStudent = async (req, res) => {
   try {
     const { studentId } = req.params;
     const results = await Result.find({ studentId })
       .populate("examId")
-      .populate("classId");
+      .populate("classId")
+      .populate("studentId"); // ✅ optional if you want student details too
+
+    // marksObtained is embedded, automatically included
     res.status(200).json({ results });
   } catch (err) {
-    res
-      .status(500)
-      .json({ message: "Failed to fetch results", error: err.message });
+    res.status(500).json({
+      message: "Failed to fetch results",
+      error: err.message,
+    });
   }
 };
 

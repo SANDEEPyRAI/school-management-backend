@@ -14,6 +14,27 @@ const { checkPermission } = require("../middlewares/rbac.middelware");
 /**
  * @swagger
  * /api/exams:
+ *   get:
+ *     tags: [Exam]
+ *     summary: Get all exams
+ *     description: Requires "exams.view" permission
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200: { description: List of all exams }
+ *       403: { description: Forbidden (RBAC) }
+ *       500: { description: Failed to fetch exams }
+ */
+router.get(
+  "/",
+  protect,
+  checkPermission("exams", "view"),
+  examController.getAllExams
+);
+
+/**
+ * @swagger
+ * /api/exams:
  *   post:
  *     tags: [Exam]
  *     summary: Create an exam

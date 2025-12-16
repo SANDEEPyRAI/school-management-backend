@@ -10,7 +10,7 @@ const { checkPermission } = require("../middlewares/rbac.middelware");
  *   post:
  *     tags: [Result]
  *     summary: Record student result
- *     description: Records marks and grade for a student in an exam
+ *     description: Records subject-wise marks and grade for a student in an exam
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -20,11 +20,33 @@ const { checkPermission } = require("../middlewares/rbac.middelware");
  *           schema:
  *             type: object
  *             properties:
- *               examId: { type: string }
- *               studentId: { type: string }
- *               marksObtained: { type: number }
- *               grade: { type: string }
- *               classId: { type: string }
+ *               examId:
+ *                 type: string
+ *               studentId:
+ *                 type: string
+ *               classId:
+ *                 type: string
+ *               marksObtained:
+ *                 type: object
+ *                 properties:
+ *                   hindi: { type: number, minimum: 0 }
+ *                   english: { type: number, minimum: 0 }
+ *                   maths: { type: number, minimum: 0 }
+ *                   science: { type: number, minimum: 0 }
+ *                   socialScience: { type: number, minimum: 0 }
+ *                   physics: { type: number, minimum: 0 }
+ *                   chemistry: { type: number, minimum: 0 }
+ *                   biology: { type: number, minimum: 0 }
+ *                   computer: { type: number, minimum: 0 }
+ *                   economics: { type: number, minimum: 0 }
+ *                   businessStudies: { type: number, minimum: 0 }
+ *                   accountancy: { type: number, minimum: 0 }
+ *                   geography: { type: number, minimum: 0 }
+ *                   politicalScience: { type: number, minimum: 0 }
+ *                   history: { type: number, minimum: 0 }
+ *                   psychology: { type: number, minimum: 0 }
+ *               grade:
+ *                 type: string
  *     responses:
  *       201:
  *         description: Result recorded
@@ -35,6 +57,7 @@ const { checkPermission } = require("../middlewares/rbac.middelware");
  *       500:
  *         description: Failed to record result
  */
+
 router.post(
   "/",
   protect,
@@ -129,15 +152,17 @@ router.get(
  * /api/results/{id}:
  *   put:
  *     tags: [Result]
- *     summary: Update a result
- *     description: Updates marks or grade for a specific result record
+ *     summary: Update student result
+ *     description: Updates subject-wise marks and grade for a student in an exam
  *     security:
  *       - bearerAuth: []
  *     parameters:
- *       - name: id
- *         in: path
+ *       - in: path
+ *         name: id
  *         required: true
- *         schema: { type: string }
+ *         schema:
+ *           type: string
+ *         description: Result ID
  *     requestBody:
  *       required: true
  *       content:
@@ -145,9 +170,33 @@ router.get(
  *           schema:
  *             type: object
  *             properties:
- *               marksObtained: { type: number }
- *               grade: { type: string }
- *               classId: { type: string }
+ *               examId:
+ *                 type: string
+ *               studentId:
+ *                 type: string
+ *               classId:
+ *                 type: string
+ *               marksObtained:
+ *                 type: object
+ *                 properties:
+ *                   hindi: { type: number, minimum: 0 }
+ *                   english: { type: number, minimum: 0 }
+ *                   maths: { type: number, minimum: 0 }
+ *                   science: { type: number, minimum: 0 }
+ *                   socialScience: { type: number, minimum: 0 }
+ *                   physics: { type: number, minimum: 0 }
+ *                   chemistry: { type: number, minimum: 0 }
+ *                   biology: { type: number, minimum: 0 }
+ *                   computer: { type: number, minimum: 0 }
+ *                   economics: { type: number, minimum: 0 }
+ *                   businessStudies: { type: number, minimum: 0 }
+ *                   accountancy: { type: number, minimum: 0 }
+ *                   geography: { type: number, minimum: 0 }
+ *                   politicalScience: { type: number, minimum: 0 }
+ *                   history: { type: number, minimum: 0 }
+ *                   psychology: { type: number, minimum: 0 }
+ *               grade:
+ *                 type: string
  *     responses:
  *       200:
  *         description: Result updated
@@ -158,6 +207,7 @@ router.get(
  *       500:
  *         description: Failed to update result
  */
+
 router.put(
   "/:id",
   protect,

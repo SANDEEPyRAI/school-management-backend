@@ -144,18 +144,18 @@ exports.deleteUser = async (req, res) => {
   }
 };
 
-// Admin assigns permissions to a teacher
+// Assign permissions to any user (admin, teacher, student)
 exports.assignPermissions = async (req, res) => {
   try {
     const { userId } = req.params;
     const { permissions } = req.body; // { exams: { view: true, edit: false }, ... }
 
     const user = await User.findById(userId);
-    if (!user || user.role !== "teacher") {
-      return res.status(404).json({ message: "Teacher not found" });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
     }
 
-    // ✅ Validate incoming permissions object
+    // ✅ Allowed modules list
     const allowedModules = [
       "attendance",
       "students",
@@ -192,6 +192,7 @@ exports.assignPermissions = async (req, res) => {
 
     res.status(200).json({
       message: "Permissions updated successfully",
+      role: user.role, // ✅ show which role got updated
       permissions: user.permissions,
     });
   } catch (err) {

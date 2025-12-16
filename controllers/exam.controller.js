@@ -1,5 +1,6 @@
 const Exam = require("../models/exam.model");
 
+// ✅ Create exam
 exports.createExam = async (req, res) => {
   try {
     const exam = await Exam.create(req.body);
@@ -11,10 +12,23 @@ exports.createExam = async (req, res) => {
   }
 };
 
+// ✅ Get all exams
+exports.getAllExams = async (req, res) => {
+  try {
+    const exams = await Exam.find().populate("classId");
+    res.status(200).json({ exams });
+  } catch (err) {
+    res
+      .status(500)
+      .json({ message: "Failed to fetch exams", error: err.message });
+  }
+};
+
+// ✅ Get exams by class
 exports.getExamsByClass = async (req, res) => {
   try {
     const { classId } = req.params;
-    const exams = await Exam.find({ classId });
+    const exams = await Exam.find({ classId }).populate("classId");
     res.status(200).json({ exams });
   } catch (err) {
     res
@@ -23,10 +37,11 @@ exports.getExamsByClass = async (req, res) => {
   }
 };
 
+// ✅ Get exams by date
 exports.getExamsByDate = async (req, res) => {
   try {
     const { date } = req.params;
-    const exams = await Exam.find({ date });
+    const exams = await Exam.find({ date }).populate("classId");
     res.status(200).json({ exams });
   } catch (err) {
     res
@@ -35,6 +50,7 @@ exports.getExamsByDate = async (req, res) => {
   }
 };
 
+// ✅ Update exam
 exports.updateExam = async (req, res) => {
   try {
     const { id } = req.params;
@@ -48,6 +64,7 @@ exports.updateExam = async (req, res) => {
   }
 };
 
+// ✅ Delete exam
 exports.deleteExam = async (req, res) => {
   try {
     const { id } = req.params;
