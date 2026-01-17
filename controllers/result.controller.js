@@ -1,20 +1,38 @@
 const Result = require("../models/result.model");
 
-// Record new result
+// // Record new result
+// const Result = require("../models/result.model");
+
 exports.recordResult = async (req, res) => {
   try {
-    const { examId, studentId, marksObtained, grade, classId } = req.body;
+    const { examId, studentId, classId, grade, subjects } = req.body;
 
+    // ✅ Prevent duplicate exam+student
     const existing = await Result.findOne({ examId, studentId });
-    if (existing)
+    if (existing) {
       return res.status(400).json({ message: "Result already recorded" });
+    }
 
+    // ✅ Map subjects → marksObtained
+    const marksObtained = subjects || {};
+
+    // ✅ Calculate totals
+    const totalMarks = Object.values(marksObtained).reduce(
+      (sum, val) => sum + Number(val || 0),
+      0
+    );
+    const subjectCount = Object.keys(marksObtained).length || 1;
+    const percentage = (totalMarks / (subjectCount * 100)) * 100;
+
+    // ✅ Create result
     const result = await Result.create({
       examId,
       studentId,
-      marksObtained, // ✅ ab object of subjects
-      grade,
       classId,
+      grade,
+      marksObtained,
+      totalMarks,
+      percentage,
     });
 
     res.status(201).json({ result });
@@ -46,9 +64,8 @@ exports.getResultsByStudent = async (req, res) => {
     const results = await Result.find({ studentId })
       .populate("examId")
       .populate("classId")
-      .populate("studentId"); // ✅ optional if you want student details too
+      .populate("studentId");
 
-    // marksObtained is embedded, automatically included
     res.status(200).json({ results });
   } catch (err) {
     res.status(500).json({

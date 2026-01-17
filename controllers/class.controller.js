@@ -3,8 +3,17 @@ const Class = require("../models/class.model");
 // Create a class
 exports.createClass = async (req, res) => {
   try {
+    // create new class
     const newClass = await Class.create(req.body);
-    res.status(201).json({ class: newClass });
+
+    // ✅ re-fetch with populate to include subject name
+    const populatedClass = await Class.findById(newClass._id).populate(
+      "subjects",
+      "_id name"
+    ); // only id + name
+    // .populate("classTeacher", "_id fullName email"); // optional: teacher details
+
+    res.status(201).json({ class: populatedClass });
   } catch (err) {
     res
       .status(500)
@@ -17,7 +26,8 @@ exports.getAllClasses = async (req, res) => {
   try {
     const classes = await Class.find()
       .populate("teacherIds", "fullName email role")
-      .populate("studentIds", "fullName email role");
+      .populate("studentIds", "fullName email role")
+      .populate("subjects", "_id name");
 
     res.status(200).json({ classes });
   } catch (err) {
